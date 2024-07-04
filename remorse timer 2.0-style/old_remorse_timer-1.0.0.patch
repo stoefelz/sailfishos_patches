@@ -1,0 +1,61 @@
+diff -ur a/usr/lib/qt5/qml/Sailfish/Silica/private/RemorseBase.qml b/usr/lib/qt5/qml/Sailfish/Silica/private/RemorseBase.qml
+--- a/usr/lib/qt5/qml/Sailfish/Silica/private/RemorseBase.qml	2021-02-07 23:15:47.188003906 +0100
++++ b/usr/lib/qt5/qml/Sailfish/Silica/private/RemorseBase.qml	2021-02-07 23:23:17.129594110 +0100
+@@ -108,23 +108,38 @@
+         property int margin: Theme.paddingMedium
+         highlighted: root.highlighted
+         height: parent.height - 2 * y
+-        x: margin + offset + (root.leftMargin - Theme.horizontalPageMargin)
++        x: 0
+         y: _narrowMode || parent.height > Theme.itemSizeMedium || _belowGridItem ? margin : 0
+-        width: parent.width - 2 * margin - (root.leftMargin - Theme.horizontalPageMargin) - (root.rightMargin - Theme.horizontalPageMargin)
++        width: parent.width
++        color: Theme.highlightDimmerColor
++        opacity: 0.9
+ 
+         BubbleBackground {
+             anchors {
+                 top: parent.top
+-                bottom: parent.bottom
+                 right: parent.right
+             }
+ 
+-            radius: background.radius
+-            width: Math.round((_seconds - _secsRemaining)/_seconds * background.width)
++            height: background.height > 300 ? 15 : background.height/20
++            width: background.width
+             roundedCorners: _secsRemaining === 0 ? BubbleBackground.AllCorners
+                                                  : BubbleBackground.TopRight | BubbleBackground.BottomRight
+ 
+-            opacity: root.palette.colorScheme === Theme.LightOnDark ? Theme.opacityLow : 1.0
++            opacity: 1.0
++            color: Theme.highlightColor
++        }
++        
++        BubbleBackground {
++            anchors {
++                top: parent.top
++                right: parent.right
++            }
++            height: background.height > 300 ? 15 : background.height/20
++            //smooth-remorse-counters patch from hsjpekka
++            width: Math.round((_timeout - _msRemaining)/_timeout * background.width)
++            roundedCorners: _secsRemaining === 0 ? BubbleBackground.AllCorners
++                                                 : BubbleBackground.TopRight | BubbleBackground.BottomRight
++            opacity: 1.0
+             color: Theme.highlightDimmerColor
+         }
+     }
+
+diff -ur a/usr/lib/qt5/qml/Sailfish/Silica/RemorsePopup.qml b/usr/lib/qt5/qml/Sailfish/Silica/RemorsePopup.qml
+--- a/usr/lib/qt5/qml/Sailfish/Silica/RemorsePopup.qml	2021-02-07 17:51:19.011800400 +0100
++++ b/usr/lib/qt5/qml/Sailfish/Silica/RemorsePopup.qml	2021-02-07 17:53:48.995633217 +0100
+@@ -97,7 +97,7 @@
+         }
+     }
+ 
+-    height: Math.max(Theme.itemSizeSmall, _labels.height + 2 * Theme.paddingMedium)
++    height: Math.max(Theme.itemSizeSmall, _labels.height + 2 * Theme.paddingMedium)*1.1
+     y: -height
+     z: 1
+     _wideMode: screen.sizeCategory > Screen.Medium

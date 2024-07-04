@@ -1,0 +1,47 @@
+diff -ur a/usr/lib/qt5/qml/Sailfish/Weather/WeatherBanner.qml	 b/usr/lib/qt5/qml/Sailfish/Weather/WeatherBanner.qml
+--- a/usr/lib/qt5/qml/Sailfish/Weather/WeatherBanner.qml	2021-09-22 16:05:06.000000000 +0200
++++ b/usr/lib/qt5/qml/Sailfish/Weather/WeatherBanner.qml	2021-09-22 16:32:22.000000000 +0200
+@@ -72,11 +72,21 @@
+     Column {
+         id: column
+         width: parent.width
++
++
++      MouseArea{
++
++	     property bool down: pressed && containsMouse
++	     onClicked: expanded = !expanded
++	     width: parent.width;
++	     height: Theme.itemSizeSmall
++	     anchors { right: parent.right; rightMargin: Theme.horizontalPageMargin }
++	     enabled: savedWeathersModel.currentWeather && savedWeathersModel.currentWeather.populated && expanded
++
+         Row {
+             id: row
+ 
+-            property int margin: (column.width - image.width - Theme.paddingMedium - temperatureLabel.width
+-                                  - Theme.paddingSmall - cityLabel.width)/2
++            property int margin: (column.width - image.width - Theme.paddingMedium - Theme.paddingSmall - cityLabel.width)/2
+ 
+             x: margin
+             width: parent.width - x
+@@ -128,7 +138,7 @@
+                 height: 1
+                 width: parent.margin - expandButton.width - Theme.horizontalPageMargin + Theme.paddingLarge
+             }
+-
++/*
+             IconButton {
+                 id: expandButton
+ 
+@@ -141,8 +151,9 @@
+                     rotation: expanded ? 180 : 0
+                 }
+                 Behavior on icon.rotation { RotationAnimator { duration: 200 }}
+-            }
++            }*/
+         }
++      }
+         Column {
+             width: parent.width
+             opacity: expanded ? 1.0 : 0.0

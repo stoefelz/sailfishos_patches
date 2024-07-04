@@ -1,0 +1,115 @@
+diff -ur a/usr/lib/qt5/qml/Sailfish/Calendar/CalendarColorBar.qml b/usr/lib/qt5/qml/Sailfish/Calendar/CalendarColorBar.qml
+--- a/usr/lib/qt5/qml/Sailfish/Calendar/CalendarColorBar.qml	2021-02-16 17:07:46.507684333 +0100
++++ b/usr/lib/qt5/qml/Sailfish/Calendar/CalendarColorBar.qml	2021-02-16 17:33:54.071488627 +0100
+@@ -12,6 +12,6 @@
+     id: root
+ 
+     height: parent.height
+-    width: Theme.paddingSmall
+-    radius: Math.round(width/3)
++    width: Theme.paddingSmall / 1.75
++    radius: 0
+ }
+
+diff -ur a/usr/lib/qt5/qml/Sailfish/Calendar/CalendarWidget.qml b/usr/lib/qt5/qml/Sailfish/Calendar/CalendarWidget.qml
+--- a/usr/lib/qt5/qml/Sailfish/Calendar/CalendarWidget.qml	2021-02-16 17:07:46.507684333 +0100
++++ b/usr/lib/qt5/qml/Sailfish/Calendar/CalendarWidget.qml	2021-02-16 17:33:54.071488627 +0100
+@@ -130,15 +130,6 @@
+         eventLimit: calendarWidget.maximumEvents
+     }
+ 
+-    Item {
+-        visible: eventsModel.count > 0
+-        HighlightImage {
+-            id: icon
+-            source: "image://theme/icon-lock-calendar"
+-            x: Theme.horizontalPageMargin
+-        }
+-    }
+-
+     Repeater {
+         id: repeater
+         model: eventsModel
+@@ -161,17 +152,17 @@
+ 
+             Label {
+                 visible: showHeader
+-                x: labelLeftMargin
+-                width: parent.width - x
++                x: Theme.horizontalPageMargin
++                width: parent.width - x - Theme.horizontalPageMargin
+                 truncationMode: TruncationMode.Fade
+-                font.pixelSize: Theme.fontSizeSmall
++                font.pixelSize: Theme.fontSizeSmallBase
+                 color: Theme.highlightColor
+                 text: showHeader ? dateLabel : ""
+             }
+ 
+             CalendarWidgetDelegate {
+                 id: delegate
+-                labelLeftMargin: calendarWidget.labelLeftMargin
++                labelLeftMargin: Theme.horizontalPageMargin
+                 pixelSize: timeLabelMetrics.font.pixelSize
+                 maxTimeLabelWidth: calendarWidget.maxTimeLabelWidth
+                 // event started yesterday or earlier is still today on list
+   
+diff -ur a/usr/lib/qt5/qml/Sailfish/Calendar/CalendarWidgetDelegate.qml b/usr/lib/qt5/qml/Sailfish/Calendar/CalendarWidgetDelegate.qml
+--- a/usr/lib/qt5/qml/Sailfish/Calendar/CalendarWidgetDelegate.qml	2021-02-16 17:07:46.507684333 +0100
++++ b/usr/lib/qt5/qml/Sailfish/Calendar/CalendarWidgetDelegate.qml	2021-02-16 17:33:54.071488627 +0100
+@@ -33,33 +33,44 @@
+     height: row.height + 2*Theme.paddingMedium
+ 
+     Row {
+-        id: row
+-        x: labelLeftMargin
++	     id: row_colorbar
++        x: 0
+         width: parent.width - x
+         spacing: Theme.paddingSmall
+         anchors.verticalCenter: parent.verticalCenter
++	
++	     CalendarColorBar {
++            id: colorBar
++            color: model.color
++            height: Math.max(timeLabel.height, nameLabel.height) * 1.4
++        }
++
++    }
++
++    Row {
++        id: row
++        x: Theme.paddingLarge
++        width: parent.width - x
++        spacing: Theme.paddingMedium
++        anchors.verticalCenter: parent.verticalCenter
++
+         Label {
+             id: timeLabel
+-
++	         horizontalAlignment: Text.AlignRight
++	         anchors.verticalCenter: parent.verticalCenter
+             width: Math.max(maxTimeLabelWidth, implicitWidth)
+             color: highlighted ? Theme.secondaryHighlightColor : Theme.secondaryColor
+-            font.pixelSize: delegate.pixelSize
++            font.pixelSize: delegate.pixelSize * 0.9
+             font.strikeout: cancelled
+             //% "All day"
+             text: allDay ? qsTrId("sailfish_calendar-la-all_day")
+                          : Format.formatDate(startTime, Formatter.TimeValue)
+         }
+ 
+-        CalendarColorBar {
+-            id: colorBar
+-            color: model.color
+-            height: Math.max(timeLabel.height, nameLabel.height)
+-        }
+-
+         Label {
+             id: nameLabel
+ 
+-            width: parent.width - timeLabel.width - colorBar.width - 2*parent.spacing
++            width: parent.width - timeLabel.width - colorBar.width - 2*parent.spacing - Theme.horizontalPageMargin
+ 
+             color: highlighted ? Theme.highlightColor : Theme.primaryColor
+             text: CalendarTexts.ensureEventTitle(displayLabel)
+              

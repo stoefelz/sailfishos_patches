@@ -1,0 +1,142 @@
+--- /usr/lib/qt5/qml/Sailfish/Media/MprisControls.qml	2022-12-26 01:43:13.117894773 +0100
++++ /usr/lib/qt5/qml/Sailfish/Media/MprisControls.qml	2022-12-26 01:43:32.809841351 +0100
+@@ -4,6 +4,7 @@
+ MouseArea {
+     id: mprisControls
+ 
++    property var customPixelSize: Theme.fontSizeMedium
+     property bool isPlaying
+     property alias artistAndSongText: artistAndSong.artistAndSongText
+     property bool nextEnabled
+@@ -63,7 +64,7 @@
+             id: songLabel
+ 
+             width: parent.width
+-            font.pixelSize: Theme.fontSizeMedium
++            font.pixelSize: customPixelSize //Theme.fontSizeMedium
+             truncationMode: TruncationMode.Fade
+             horizontalAlignment: implicitWidth > width ? Text.AlignHLeft : Text.AlignHCenter
+             color: artistSongArea.pressed ? Theme.highlightColor : mprisControls.textColor
+@@ -74,7 +75,7 @@
+             id: artistLabel
+ 
+             width: parent.width
+-            font.pixelSize: Theme.fontSizeMedium
++            font.pixelSize: customPixelSize //Theme.fontSizeMedium
+             truncationMode: TruncationMode.Fade
+             horizontalAlignment: implicitWidth > width ? Text.AlignHLeft : Text.AlignHCenter
+             color: songLabel.color
+--- /usr/share/lipstick-jolla-home-qt5/eventsview/EventsViewList.qml	2022-12-26 01:43:03.689920353 +0100
++++ /usr/share/lipstick-jolla-home-qt5/eventsview/EventsViewList.qml	2022-12-26 01:46:49.065308906 +0100
+@@ -11,6 +11,8 @@
+ import org.nemomobile.lipstick 0.1
+ import org.nemomobile.time 1.0
+ import org.nemomobile.configuration 1.0
++import Sailfish.Media 1.0
++import Nemo.DBus 2.0
+ import "../lockscreen"
+ import "../notifications" as Notifications
+ import "weather"
+@@ -20,6 +22,7 @@
+ SilicaFlickable {
+     id: root
+ 
++    property alias mpris: mpris
+     property real statusBarHeight
+     readonly property bool hasNotifications: notificationList.count > 0 || systemUpdateList.count > 0 || feedsList.hasVisibleFeeds
+     property bool stickyHeader: !Lipstick.compositor.lockScreenLayer.lockScreenEventsEnabled
+@@ -149,6 +152,94 @@
+             active: false
+             eventsView: root
+         }
++        
++        Column {
++            id: playerColumn
++            width: parent.width
++            visible: mpris.item && mpris.item.enabled && mpris.item.artistAndSongText.artist != ""
++            spacing: Theme.paddingMedium
++            
++            Item { 
++                height: calendarWidget.active ? Theme.paddingSmall : 0
++                width: parent.width 
++            }
++
++            Label {
++                    id: playerHeaderLabel
++
++                    text: "Player"
++
++                    color: Theme.highlightColor
++                    font.pixelSize: Theme.fontSizeLarge
++                    x: Theme.horizontalPageMargin
++                    truncationMode: TruncationMode.Fade
++                    width: (_housekeeping ? housekeepingButtons.x : layerButton.x) - x
++                }
++
++            SilicaItem {        
++                id: mprisBackground
++
++                x: (parent.width - width) / 2
++                y: bottomBackground.y - height - Theme.paddingMedium
++
++                width: Screen.sizeCategory > Screen.Medium ? 4 * Theme.itemSizeExtraLarge : 0.75 * parent.width
++                height: mpris.item ? mpris.item.height : 0
++
++                opacity: centerBackground.opacity
++
++                MprisPlayerControls {
++                    id: mpris
++
++                    onItemChanged: {
++                        if (item) {
++                            //item.textColor = Theme.highlightColor //Qt.binding(function() {return lockScreen.textColor })
++                            item.width = Qt.binding(function() { return mprisBackground.width })
++                            item.buttonSize = Screen.sizeCategory > Screen.Medium ? Theme.iconSizeExtraLarge : Theme.iconSizeLarge
++                            item.customPixelSize = Theme.fontSizeSmall
++                            item.playPauseRequested.connect(mce.startBlankDelay)
++                            item.nextRequested.connect(mce.startBlankDelay)
++                            item.previousRequested.connect(mce.startBlankDelay)
++                        }
++                    }
++
++                    Timer {
++                        id: mprisExpiryTimer
++
++                        readonly property bool playing: mpris.item && mpris.item.isPlaying
++
++                        interval: 30 * 60 * 1000
++
++                        onPlayingChanged: {
++                            if (playing) {
++                                stop()
++                                mpris.item.enabled = true
++                            } else {
++                                restart() 
++                            }
++                        }
++
++                        onTriggered: mpris.item.enabled = false
++                    }
++	        }
++
++	        DBusInterface {
++                        id: mce
++
++                    bus: DBus.SystemBus
++                    service: "com.nokia.mce"
++                    path: "/com/nokia/mce/request"
++                    iface: "com.nokia.mce.request"
++
++                    function startBlankDelay() {
++                        mce.call("notification_begin_req", ["mpris_lock_blank_delay", 3000, 2000])
++                    }
++
++                    function endBlankDelay() {    
++                        mce.call("notification_end_req", ["mpris_lock_blank_delay", 0])
++                    }
++	        }
++        }
++    }
+ 
+         ConfigurationValue {
+             id: eventsScreenWidgets

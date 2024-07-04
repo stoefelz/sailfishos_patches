@@ -1,0 +1,73 @@
+diff -ur a/usr/share/jolla-email/pages/MessageViewFooter.qml b/usr/share/jolla-email/pages/MessageViewFooter.qml
+--- a/usr/share/jolla-email/pages/MessageViewFooter.qml	2021-02-16 17:07:46.507684333 +0100
++++ b/usr/share/jolla-email/pages/MessageViewFooter.qml	2021-02-16 17:33:54.071488627 +0100
+@@ -28,13 +28,13 @@
+ 
+     height: portrait ? Theme.itemSizeMedium : Theme.itemSizeSmall
+ 
+-    palette.colorScheme: Theme.DarkOnLight
++    palette.colorScheme: Theme.LightOnDark
+ 
+     Rectangle {
+         width: footer.width
+         height: footer.height
+ 
+-        color: "#f3f0f0"
++        color: Theme.highlightDimmerColor
+     }
+ 
+     TextSelectionToolbar {
+@@ -52,8 +52,6 @@
+                 var buttons = [
+                     {
+                         "icon": "image://theme/icon-m-message-reply",
+-                        //% "Reply"
+-                        "label": qsTrId("jolla-email-la-reply"),
+                         "action": footer.reply
+                     }
+                 ]
+@@ -62,8 +60,6 @@
+                     buttons.push(
+                         {
+                             "icon": "image://theme/icon-m-message-reply-all",
+-                            //% "Reply All"
+-                            "label": qsTrId("jolla-email-la-reply_all"),
+                             "action": footer.replyAll
+                         })
+                 }
+@@ -71,12 +67,10 @@
+                     {
+                         "icon": "image://theme/icon-m-delete",
+                         //% "Delete"
+-                        "label": qsTrId("jolla-email-la-delete"),
+                         "action": footer.deleteEmail
+                     }, {
+-                        "icon": "image://theme/icon-m-message-forward",
++                        "icon": "image://theme/icon-m-rotate-right",
+                         //% "Forward"
+-                        "label": qsTrId("jolla-email-la-forward"),
+                         "action": footer.forward
+                     })
+                 return buttons
+diff -ur a/usr/share/jolla-email/pages/MessageViewHeader.qml b/usr/share/jolla-email/pages/MessageViewHeader.qml
+--- a/usr/share/jolla-email/pages/MessageViewHeader.qml	2021-02-16 17:07:51.357671174 +0100
++++ b/usr/share/jolla-email/pages/MessageViewHeader.qml	2021-02-16 17:09:00.444186055 +0100
+@@ -124,7 +124,7 @@
+     SilicaControl {
+         id: content
+ 
+-        palette.colorScheme: Theme.DarkOnLight
++        palette.colorScheme: Theme.LightOnDark
+ 
+         width: root.width - x
+         height: root.open ? buttonsColumn.implicitHeight : 0
+@@ -141,7 +141,7 @@
+             width: root.width
+             height: buttonsColumn.implicitHeight
+ 
+-            color: "#f3f0f0"
++            color: Theme.highlightDimmerColor
+         }
+ 
+         Column {
+

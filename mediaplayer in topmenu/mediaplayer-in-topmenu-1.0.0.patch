@@ -1,0 +1,86 @@
+--- /usr/share/jolla-settings/pages/display/BrightnessSettingsSlider.qml	2022-12-26 22:39:36.619548399 +0100
++++ /usr/share/jolla-settings/pages/display/BrightnessSettingsSlider.qml	2022-12-26 22:50:25.757628743 +0100
+@@ -2,11 +2,13 @@
+ import Sailfish.Silica 1.0
+ import com.jolla.settings 1.0
+ import org.nemomobile.systemsettings 1.0
++import Sailfish.Media 1.0
++import Nemo.DBus 2.0
+ 
+ SettingsControl {
+     id: root
+ 
+-    contentHeight: slider.height
++    contentHeight: mprisBackground.visible ? ( slider.height + mprisBackground.height ) : slider.height
+ 
+     BrightnessSliderController {
+         slider: slider
+@@ -30,4 +32,68 @@
+     DisplaySettings {
+         id: displaySettings
+     }
++    
++    SilicaItem {        
++        id: mprisBackground
++        visible: mpris.item && mpris.item.enabled && mpris.item.artistAndSongText.song != ""
++
++        x: (parent.width - width) / 2
++        anchors.top: slider.bottom
++        anchors.topMargin: Theme.paddingMedium
++
++        width: Screen.sizeCategory > Screen.Medium ? 4 * Theme.itemSizeExtraLarge : 0.75 * parent.width
++        height: mpris.item ? mpris.item.height : 0
++
++        MprisPlayerControls {
++            id: mpris
++
++            onItemChanged: {
++                if (item) {
++                    item.textColor = Qt.binding(function() {return Theme.highlightColor }) 
++                    item.width = Qt.binding(function() { return mprisBackground.width })
++                    item.buttonSize = Screen.sizeCategory > Screen.Medium ? Theme.iconSizeExtraLarge : Theme.iconSizeLarge
++                    item.customPixelSize = Theme.fontSizeSmall
++                    item.playPauseRequested.connect(mce.startBlankDelay)
++                    item.nextRequested.connect(mce.startBlankDelay)
++                    item.previousRequested.connect(mce.startBlankDelay)
++                }
++            }
++
++            Timer {
++                id: mprisExpiryTimer
++
++                readonly property bool playing: mpris.item && mpris.item.isPlaying
++
++                interval: 30 * 60 * 1000
++
++                onPlayingChanged: {
++                    if (playing) {
++                        stop()
++                        mpris.item.enabled = true
++                    } else {
++                        restart() 
++                    }
++                }
++
++                onTriggered: mpris.item.enabled = false
++            }
++    }
++
++    DBusInterface {
++                id: mce
++
++            bus: DBus.SystemBus
++            service: "com.nokia.mce"
++            path: "/com/nokia/mce/request"
++            iface: "com.nokia.mce.request"
++
++            function startBlankDelay() {
++                mce.call("notification_begin_req", ["mpris_lock_blank_delay", 3000, 2000])
++            }
++
++            function endBlankDelay() {    
++                mce.call("notification_end_req", ["mpris_lock_blank_delay", 0])
++            }
++        }
++    }
+ }

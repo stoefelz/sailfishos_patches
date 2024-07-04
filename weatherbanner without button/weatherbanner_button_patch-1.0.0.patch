@@ -1,0 +1,52 @@
+diff -ur a/usr/lib/qt5/qml/Sailfish/Weather/WeatherBanner.qml	 b/usr/lib/qt5/qml/Sailfish/Weather/WeatherBanner.qml
+--- a/usr/lib/qt5/qml/Sailfish/Weather/WeatherBanner.qml	2021-02-08 15:36:49.183546369 +0100
++++ b/usr/lib/qt5/qml/Sailfish/Weather/WeatherBanner.qml	2021-02-08 15:48:15.960376611 +0100
+@@ -72,10 +72,20 @@
+     Column {
+         id: column
+         width: parent.width
++        
++        MouseArea {
++
++            property bool down: pressed && containsMouse
++            onClicked: expanded = !expanded
++            width: parent.width
++            height: Theme.itemSizeSmall
++            anchors { right: parent.right; rightMargin: Theme.horizontalPageMargin }
++            enabled: savedWeathersModel.currentWeather && savedWeathersModel.currentWeather.populated && !_error && expanded
++        
+         Row {
+             id: row
+ 
+-            property int margin: (column.width - image.width - Theme.paddingMedium - temperatureLabel.width - cityLabel.width)/2
++            property int margin: (column.width - image.width - Theme.paddingMedium - cityLabel.width)/2
+ 
+             x: margin
+             width: parent.width - x
+@@ -125,24 +135,9 @@
+                 width: parent.margin - expandButton.width
+             }
+ 
+-            MouseArea {
+-                id: expandButton
+-                property bool down: pressed && containsMouse
+-                onClicked: expanded = !expanded
+-
+-                width: Theme.itemSizeSmall
+-                height: Math.max(parent.height, Theme.itemSizeSmall)
+-
+-                Icon {
+-                    highlighted: parent.down
+-                    transformOrigin: Item.Center
+-                    anchors.centerIn: parent
+-                    source: "image://theme/icon-m-change-type"
+-                    rotation: expanded ? 180 : 0
+-                    Behavior on rotation { RotationAnimator { duration: 200 }}
+-                }
+-            }
+         }
++        
++    }
+         Column {
+             width: parent.width
+             opacity: expanded ? 1.0 : 0.0
