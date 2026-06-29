@@ -1,0 +1,115 @@
+diff --ur a/usr/share/lipstick-jolla-home-qt5/eventsview/EventsViewList.qml b/usr/share/lipstick-jolla-home-qt5/eventsview/EventsViewList.qml
+--- a/usr/share/lipstick-jolla-home-qt5/eventsview/EventsViewList.qml	2026-06-29 21:12:42.000000000 +0200
++++ b/usr/share/lipstick-jolla-home-qt5/eventsview/EventsViewList.qml	2026-06-29 22:00:19.089974956 +0200
+@@ -12,6 +12,8 @@
+ import org.nemomobile.lipstick 0.1
+ import Nemo.Time 1.0
+ import Nemo.Configuration 1.0
++import Sailfish.Media 1.0
++import Nemo.DBus 2.0
+ import "../lockscreen"
+ import "../notifications" as Notifications
+ import "weather"
+@@ -21,6 +23,7 @@
+ SilicaFlickable {
+     id: root
+ 
++    property alias mpris: mpris
+     property real statusBarHeight
+     readonly property bool hasNotifications: notificationList.count > 0
+                                              || systemUpdateList.count > 0
+@@ -187,6 +190,94 @@
+         }
+     }
+ 
++    Column {
++        id: playerColumn
++        width: parent.width
++        visible: mpris.item && mpris.item.enabled && mpris.item.artistAndSongText.artist != ""
++        spacing: Theme.paddingLarge
++        
++        Item { 
++            height: calendarWidget.active ? Theme.paddingSmall : 0
++            width: parent.width 
++        }
++
++        Label {
++                id: playerHeaderLabel
++
++                text: "Player"
++
++                color: Theme.highlightColor
++                font.pixelSize: Theme.fontSizeLarge
++                x: Theme.horizontalPageMargin
++                truncationMode: TruncationMode.Fade
++                width: (_housekeeping ? housekeepingButtons.x : layerButton.x) - x
++            }
++
++        SilicaItem {        
++            id: mprisBackground
++
++            x: (parent.width - width) / 2
++            y: bottomBackground.y - height - Theme.paddingMedium
++
++            width: Screen.sizeCategory > Screen.Medium ? 4 * Theme.itemSizeExtraLarge : 0.75 * parent.width
++            height: mpris.item ? mpris.item.height : 0
++
++            opacity: centerBackground.opacity
++
++            MprisPlayerControls {
++                id: mpris
++
++                onItemChanged: {
++                    if (item) {
++                        //item.textColor = Theme.highlightColor //Qt.binding(function() {return lockScreen.textColor })
++                        item.width = Qt.binding(function() { return mprisBackground.width })
++                        item.buttonSize = Screen.sizeCategory > Screen.Medium ? Theme.iconSizeExtraLarge : Theme.iconSizeLarge
++                        item.customPixelSize = Theme.fontSizeSmall
++                        item.playPauseRequested.connect(mce.startBlankDelay)
++                        item.nextRequested.connect(mce.startBlankDelay)
++                        item.previousRequested.connect(mce.startBlankDelay)
++                    }
++                }
++
++                Timer {
++                    id: mprisExpiryTimer
++
++                    readonly property bool playing: mpris.item && mpris.item.isPlaying
++
++                    interval: 30 * 60 * 1000
++
++                    onPlayingChanged: {
++                        if (playing) {
++                            stop()
++                            mpris.item.enabled = true
++                        } else {
++                            restart() 
++                        }
++                    }
++
++                    onTriggered: mpris.item.enabled = false
++                }
++        }
++
++        DBusInterface {
++                    id: mce
++
++                bus: DBus.SystemBus
++                service: "com.nokia.mce"
++                path: "/com/nokia/mce/request"
++                iface: "com.nokia.mce.request"
++
++                function startBlankDelay() {
++                    mce.call("notification_begin_req", ["mpris_lock_blank_delay", 3000, 2000])
++                }
++
++                function endBlankDelay() {    
++                    mce.call("notification_end_req", ["mpris_lock_blank_delay", 0])
++                }
++	        }
++        }
++    }
++
+     InfoLabel {
+         id: noNotificationsLabel
+ 
