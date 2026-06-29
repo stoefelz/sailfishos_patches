@@ -1,0 +1,39 @@
+diff -ur a/usr/share/jolla-email/pages/MessageViewFooter.qml b/usr/share/jolla-email/pages/MessageViewFooter.qml
+--- a/usr/share/jolla-email/pages/MessageViewFooter.qml	2026-06-29 21:47:10.605977964 +0200
++++ b/usr/share/jolla-email/pages/MessageViewFooter.qml	2026-06-29 21:47:09.620977968 +0200
+@@ -35,11 +35,11 @@
+ 
+     height: _bottomPadding + (portrait ? Theme.itemSizeMedium : Theme.itemSizeSmall)
+ 
+-    palette.colorScheme: Theme.DarkOnLight
++    palette.colorScheme: Theme.LightOnDark
+ 
+     Rectangle {
+         anchors.fill: parent
+-        color: "#f3f0f0"
++        color: Theme.highlightDimmerColor
+     }
+ 
+     TextSelectionToolbar {
+
+diff -ur a/usr/share/jolla-email/pages/MessageViewHeader.qml b/usr/share/jolla-email/pages/MessageViewHeader.qml
+--- a/usr/share/jolla-email/pages/MessageViewHeader.qml	2026-06-29 21:47:08.879977971 +0200
++++ b/usr/share/jolla-email/pages/MessageViewHeader.qml	2026-06-29 21:47:02.727977994 +0200
+@@ -107,7 +107,7 @@
+     SilicaControl {
+         id: content
+ 
+-        palette.colorScheme: Theme.DarkOnLight
++        palette.colorScheme: Theme.LightOnDark
+ 
+         width: root.width - x
+         height: root.open ? buttonsColumn.implicitHeight : 0
+@@ -124,7 +124,7 @@
+             width: root.width
+             height: buttonsColumn.implicitHeight
+ 
+-            color: "#f3f0f0"
++            color: Theme.highlightDimmerColor
+         }
+ 
+         Column {
