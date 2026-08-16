@@ -1,0 +1,79 @@
+diff -Nru a/usr/share/lipstick-jolla-home-qt5/layers/LauncherLayer.qml b/usr/share/lipstick-jolla-home-qt5/layers/LauncherLayer.qml
+--- a/usr/share/lipstick-jolla-home-qt5/layers/LauncherLayer.qml    2026-08-15 23:53:50.000000000 +0200
++++ b/usr/share/lipstick-jolla-home-qt5/layers/LauncherLayer.qml    2026-08-16 16:56:28.794058191 +0200
+@@ -1,4 +1,5 @@
+ import QtQuick 2.6
++import Nemo.Configuration 1.0
+ import Sailfish.Silica 1.0
+ import Sailfish.Lipstick 1.0
+ import org.nemomobile.lipstick 0.1
+@@ -112,12 +113,38 @@
+     objectName: "launcherLayer"
+ 
+     edge: PeekFilter.Bottom
+-    hintHeight: Theme.iconSizeLauncher * 2
+-                + (Screen.sizeCategory >= Screen.Large ? Theme.paddingLarge*4 : 0)
+-                + (Lipstick.compositor.topmostWindowOrientation == Qt.PortraitOrientation
+-                   ? Screen.topCutout.height : 0) // match extra topMargin in LauncherGrid
+-    hintDuration: 600
+-    _finishDragWithAnimation: !pinned && !_wasPinning
++
++     ConfigurationGroup {
++       id: hintConfig
++       path: "/apps/lipstick-jolla-home-qt5/alwaysHintRows"
++    
++       property int hintRows: 1
++       property int landscapeHintRows: -1
++        property int paddingCount: 0
++    }
++    //needs fixed values because other patches like Launcher combined changes original values
++    readonly property real configuredHintHeight:
++        cellHeight * ((Lipstick.compositor.topmostWindowOrientation == Orientation.Landscape
++                       || Lipstick.compositor.topmostWindowOrientation == Orientation.LandscapeInverted)
++                      && hintConfig.landscapeHintRows != -1
++                     ? hintConfig.landscapeHintRows
++                     : hintConfig.hintRows)
++        + (Theme.paddingSmall * hintConfig.paddingCount)
++        + (Screen.sizeCategory >= Screen.Large ? Theme.paddingLarge * 4 : 0)
++        + (Lipstick.compositor.topmostWindowOrientation == Qt.PortraitOrientation
++           ? Screen.topCutout.height : 0)
++
++    hintHeight: configuredHintHeight
++
++    onConfiguredHintHeightChanged: hintHeight = configuredHintHeight
++
++    onHintHeightChanged: {
++        if (hintHeight !== configuredHintHeight)
++            hintHeight = configuredHintHeight
++    }
++
++    hintDuration: 99999999
++        _finishDragWithAnimation: !pinned && !_wasPinning
+ 
+     MenuBackground {
+         z: -1
+diff -Nru a/usr/share/lipstick-jolla-home-qt5/layers/HomeLayer.qml b/usr/share/lipstick-jolla-home-qt5/layers/HomeLayer.qml
+--- a/usr/share/lipstick-jolla-home-qt5/layers/HomeLayer.qml    2026-08-15 23:53:50.000000000 +0200
++++ b/usr/share/lipstick-jolla-home-qt5/layers/HomeLayer.qml    2026-08-16 16:56:28.794058191 +0200
+@@ -223,14 +223,19 @@
+ 
+             scale: {
+                 if (inhibitScale) {
++                    Lipstick.compositor.launcherHinting = false
+                     return inhibitedScale
+                 } else if (Desktop.instance && Desktop.instance.switcher.appShowInProgress) {
++                    Lipstick.compositor.launcherHinting = false
+                     return inactiveScale
+-                } else if (Lipstick.compositor.launcherLayer.exposed) {
++                } /*else if (Lipstick.compositor.launcherLayer.exposed) {
+                     return 1 - ((1 - inactiveScale) * Lipstick.compositor.launcherLayer.exposure)
+-                } else if (Lipstick.compositor.topMenuLayer.exposed) {
++                } */else if (Lipstick.compositor.topMenuLayer.exposed) {
+                     return 1 - ((1 - inactiveScale) * Lipstick.compositor.topMenuLayer.exposure)
+                 } else if (homescreen.active || Lipstick.compositor.topmostIsDialog) {
++                    if(!eventsLayer.visible){
++                        Lipstick.compositor.launcherHinting = true
++                    }
+                     return 1
+                 } else {
+                     return inactiveScale
