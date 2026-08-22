@@ -1,0 +1,524 @@
+--- /dev/null   2026-08-11 06:46:35.606749245 +0200
++++ /usr/share/maliit/plugins/com/jolla/layouts/custom-keyboard.qml 2026-08-22 21:37:57.445629402 +0200
+@@ -0,0 +1,514 @@
++/*
++ * Custom Keyboard
++ *
++ * Based on the Sailfish OS keyboard layouts.
++ */
++
++import QtQuick 2.0
++import Nemo.Configuration 1.0
++import ".."
++
++KeyboardLayout {
++    id: customLayout
++
++    languageCode: languageConfig.languageCode
++    
++    ConfigurationGroup {
++        id: languageConfig
++        path: "/apps/custom-keyboard/language"
++        property string languageCode: "EN"
++    }
++
++    splitSupported: true
++
++    ConfigurationGroup {
++        id: keyboardConfig
++        path: "/apps/custom-keyboard"
++
++        property string layoutJson: "{}"
++    }
++
++    property string configJson: keyboardConfig.layoutJson
++
++    property var layoutData: {
++        try {
++            return JSON.parse(configJson)
++        } catch (e) {
++            console.log("CUSTOM JSON parse error:", e)
++            return ({})
++        }
++    }
++
++    property var row3Keys: [
++        "z", "x", "c", "v", "b", "n", "m",
++        "row3extra1", "row3extra2"
++    ]
++
++    function keyValue(key, field, fallback) {
++        if (layoutData
++                && layoutData[key]
++                && layoutData[key][field] !== undefined) {
++            return layoutData[key][field]
++        }
++
++        return fallback
++    }
++
++    function keyActive(key, fallback) {
++        if (layoutData
++                && layoutData[key]
++                && layoutData[key]["active"] !== undefined) {
++            return layoutData[key]["active"]
++        }
++
++        return fallback
++    }
++
++    function defaultActive(key) {
++        return key !== "row1extra1"
++                && key !== "row1extra2"
++                && key !== "row2extra1"
++                && key !== "row2extra2"
++                && key !== "row3extra1"
++                && key !== "row3extra2"
++                && key !== "punctExtra"
++    }
++
++    function activeCount(keys) {
++        var count = 0
++
++        for (var i = 0; i < keys.length; ++i) {
++            if (keyActive(keys[i], defaultActive(keys[i])))
++                ++count
++        }
++
++        return count
++    }
++
++    readonly property int row3ActiveCount:
++        activeCount(row3Keys)
++
++    readonly property int row3SplitIndex:
++        Math.max(1, Math.floor((row3ActiveCount + 3) / 2))
++
++
++    /*
++     * Row 1
++     */
++
++    KeyboardRow {
++
++        CharacterKey {
++            active: customLayout.keyActive("q", true)
++            caption: customLayout.keyValue("q", "caption", "q")
++            captionShifted: customLayout.keyValue("q", "captionShifted", "Q")
++            symView: customLayout.keyValue("q", "symView", "1")
++            symView2: customLayout.keyValue("q", "symView2", "€")
++            accents: customLayout.keyValue("q", "accents", "")
++            accentsShifted: customLayout.keyValue("q", "accentsShifted", "")
++        }
++
++        CharacterKey {
++            active: customLayout.keyActive("w", true)
++            caption: customLayout.keyValue("w", "caption", "w")
++            captionShifted: customLayout.keyValue("w", "captionShifted", "W")
++            symView: customLayout.keyValue("w", "symView", "2")
++            symView2: customLayout.keyValue("w", "symView2", "£")
++            accents: customLayout.keyValue("w", "accents", "")
++            accentsShifted: customLayout.keyValue("w", "accentsShifted", "")
++        }
++
++        CharacterKey {
++            active: customLayout.keyActive("e", true)
++            caption: customLayout.keyValue("e", "caption", "e")
++            captionShifted: customLayout.keyValue("e", "captionShifted", "E")
++            symView: customLayout.keyValue("e", "symView", "3")
++            symView2: customLayout.keyValue("e", "symView2", "$")
++            accents: customLayout.keyValue("e", "accents", "èeéêë€")
++            accentsShifted: customLayout.keyValue("e", "accentsShifted", "ÈEÉÊË€")
++        }
++
++        CharacterKey {
++            active: customLayout.keyActive("r", true)
++            caption: customLayout.keyValue("r", "caption", "r")
++            captionShifted: customLayout.keyValue("r", "captionShifted", "R")
++            symView: customLayout.keyValue("r", "symView", "4")
++            symView2: customLayout.keyValue("r", "symView2", "¥")
++            accents: customLayout.keyValue("r", "accents", "")
++            accentsShifted: customLayout.keyValue("r", "accentsShifted", "")
++        }
++
++        CharacterKey {
++            active: customLayout.keyActive("t", true)
++            caption: customLayout.keyValue("t", "caption", "t")
++            captionShifted: customLayout.keyValue("t", "captionShifted", "T")
++            symView: customLayout.keyValue("t", "symView", "5")
++            symView2: customLayout.keyValue("t", "symView2", "₹")
++            accents: customLayout.keyValue("t", "accents", "tþ")
++            accentsShifted: customLayout.keyValue("t", "accentsShifted", "TÞ")
++        }
++
++        CharacterKey {
++            active: customLayout.keyActive("y", true)
++            caption: customLayout.keyValue("y", "caption", "y")
++            captionShifted: customLayout.keyValue("y", "captionShifted", "Y")
++            symView: customLayout.keyValue("y", "symView", "6")
++            symView2: customLayout.keyValue("y", "symView2", "%")
++            accents: customLayout.keyValue("y", "accents", "ýy¥")
++            accentsShifted: customLayout.keyValue("y", "accentsShifted", "ÝY¥")
++        }
++
++        CharacterKey {
++            active: customLayout.keyActive("u", true)
++            caption: customLayout.keyValue("u", "caption", "u")
++            captionShifted: customLayout.keyValue("u", "captionShifted", "U")
++            symView: customLayout.keyValue("u", "symView", "7")
++            symView2: customLayout.keyValue("u", "symView2", "<")
++            accents: customLayout.keyValue("u", "accents", "űûùuúü")
++            accentsShifted: customLayout.keyValue("u", "accentsShifted", "ŰÛÙUÚÜ")
++        }
++
++        CharacterKey {
++            active: customLayout.keyActive("i", true)
++            caption: customLayout.keyValue("i", "caption", "i")
++            captionShifted: customLayout.keyValue("i", "captionShifted", "I")
++            symView: customLayout.keyValue("i", "symView", "8")
++            symView2: customLayout.keyValue("i", "symView2", ">")
++            accents: customLayout.keyValue("i", "accents", "îïìií")
++            accentsShifted: customLayout.keyValue("i", "accentsShifted", "ÎÏÌIÍ")
++        }
++
++        CharacterKey {
++            active: customLayout.keyActive("o", true)
++            caption: customLayout.keyValue("o", "caption", "o")
++            captionShifted: customLayout.keyValue("o", "captionShifted", "O")
++            symView: customLayout.keyValue("o", "symView", "9")
++            symView2: customLayout.keyValue("o", "symView2", "[")
++            accents: customLayout.keyValue("o", "accents", "őøöôòoó")
++            accentsShifted: customLayout.keyValue("o", "accentsShifted", "ŐØÖÔÒOÓ")
++        }
++
++        CharacterKey {
++            active: customLayout.keyActive("p", true)
++            caption: customLayout.keyValue("p", "caption", "p")
++            captionShifted: customLayout.keyValue("p", "captionShifted", "P")
++            symView: customLayout.keyValue("p", "symView", "0")
++            symView2: customLayout.keyValue("p", "symView2", "]")
++            accents: customLayout.keyValue("p", "accents", "")
++            accentsShifted: customLayout.keyValue("p", "accentsShifted", "")
++        }
++
++        CharacterKey {
++            active: customLayout.keyActive("row1extra1", false)
++            caption: customLayout.keyValue("row1extra1", "caption", "")
++            captionShifted: customLayout.keyValue("row1extra1", "captionShifted", "")
++            symView: customLayout.keyValue("row1extra1", "symView", "")
++            symView2: customLayout.keyValue("row1extra1", "symView2", "")
++            accents: customLayout.keyValue("row1extra1", "accents", "")
++            accentsShifted: customLayout.keyValue("row1extra1", "accentsShifted", "")
++        }
++
++        FittedCharacterKey {
++            active: customLayout.keyActive("row1extra2", false)
++            caption: customLayout.keyValue("row1extra2", "caption", "")
++            captionShifted: customLayout.keyValue("row1extra2", "captionShifted", "")
++            symView: customLayout.keyValue("row1extra2", "symView", "")
++            symView2: customLayout.keyValue("row1extra2", "symView2", "")
++            accents: customLayout.keyValue("row1extra2", "accents", "")
++            accentsShifted: customLayout.keyValue("row1extra2", "accentsShifted", "")
++        }
++    }
++
++
++    /*
++     * Row 2
++     */
++
++    KeyboardRow {
++        splitIndex: 5
++
++        CharacterKey {
++            active: customLayout.keyActive("a", true)
++            caption: customLayout.keyValue("a", "caption", "a")
++            captionShifted: customLayout.keyValue("a", "captionShifted", "A")
++            symView: customLayout.keyValue("a", "symView", "*")
++            symView2: customLayout.keyValue("a", "symView2", "`")
++            accents: customLayout.keyValue("a", "accents", "aäàâáãå")
++            accentsShifted: customLayout.keyValue("a", "accentsShifted", "AÄÀÂÁÃÅ")
++        }
++
++        CharacterKey {
++            active: customLayout.keyActive("s", true)
++            caption: customLayout.keyValue("s", "caption", "s")
++            captionShifted: customLayout.keyValue("s", "captionShifted", "S")
++            symView: customLayout.keyValue("s", "symView", "#")
++            symView2: customLayout.keyValue("s", "symView2", "^")
++            accents: customLayout.keyValue("s", "accents", "sß$")
++            accentsShifted: customLayout.keyValue("s", "accentsShifted", "Sẞ$")
++        }
++
++        CharacterKey {
++            active: customLayout.keyActive("d", true)
++            caption: customLayout.keyValue("d", "caption", "d")
++            captionShifted: customLayout.keyValue("d", "captionShifted", "D")
++            symView: customLayout.keyValue("d", "symView", "+")
++            symView2: customLayout.keyValue("d", "symView2", "|")
++            accents: customLayout.keyValue("d", "accents", "dð")
++            accentsShifted: customLayout.keyValue("d", "accentsShifted", "DÐ")
++        }
++
++        CharacterKey {
++            active: customLayout.keyActive("f", true)
++            caption: customLayout.keyValue("f", "caption", "f")
++            captionShifted: customLayout.keyValue("f", "captionShifted", "F")
++            symView: customLayout.keyValue("f", "symView", "-")
++            symView2: customLayout.keyValue("f", "symView2", "_")
++            accents: customLayout.keyValue("f", "accents", "")
++            accentsShifted: customLayout.keyValue("f", "accentsShifted", "")
++        }
++
++        CharacterKey {
++            active: customLayout.keyActive("g", true)
++            caption: customLayout.keyValue("g", "caption", "g")
++            captionShifted: customLayout.keyValue("g", "captionShifted", "G")
++            symView: customLayout.keyValue("g", "symView", "=")
++            symView2: customLayout.keyValue("g", "symView2", "§")
++            accents: customLayout.keyValue("g", "accents", "")
++            accentsShifted: customLayout.keyValue("g", "accentsShifted", "")
++        }
++
++        CharacterKey {
++            active: customLayout.keyActive("h", true)
++            caption: customLayout.keyValue("h", "caption", "h")
++            captionShifted: customLayout.keyValue("h", "captionShifted", "H")
++            symView: customLayout.keyValue("h", "symView", "(")
++            symView2: customLayout.keyValue("h", "symView2", "{")
++            accents: customLayout.keyValue("h", "accents", "")
++            accentsShifted: customLayout.keyValue("h", "accentsShifted", "")
++        }
++
++        CharacterKey {
++            active: customLayout.keyActive("j", true)
++            caption: customLayout.keyValue("j", "caption", "j")
++            captionShifted: customLayout.keyValue("j", "captionShifted", "J")
++            symView: customLayout.keyValue("j", "symView", ")")
++            symView2: customLayout.keyValue("j", "symView2", "}")
++            accents: customLayout.keyValue("j", "accents", "")
++            accentsShifted: customLayout.keyValue("j", "accentsShifted", "")
++        }
++
++        CharacterKey {
++            active: customLayout.keyActive("k", true)
++            caption: customLayout.keyValue("k", "caption", "k")
++            captionShifted: customLayout.keyValue("k", "captionShifted", "K")
++            symView: customLayout.keyValue("k", "symView", "!")
++            symView2: customLayout.keyValue("k", "symView2", "¡")
++            accents: customLayout.keyValue("k", "accents", "")
++            accentsShifted: customLayout.keyValue("k", "accentsShifted", "")
++        }
++
++        CharacterKey {
++            active: customLayout.keyActive("l", true)
++            caption: customLayout.keyValue("l", "caption", "l")
++            captionShifted: customLayout.keyValue("l", "captionShifted", "L")
++            symView: customLayout.keyValue("l", "symView", "?")
++            symView2: customLayout.keyValue("l", "symView2", "¿")
++            accents: customLayout.keyValue("l", "accents", "")
++            accentsShifted: customLayout.keyValue("l", "accentsShifted", "")
++        }
++
++        CharacterKey {
++            active: customLayout.keyActive("row2extra1", false)
++            caption: customLayout.keyValue("row2extra1", "caption", "")
++            captionShifted: customLayout.keyValue("row2extra1", "captionShifted", "")
++            symView: customLayout.keyValue("row2extra1", "symView", "")
++            symView2: customLayout.keyValue("row2extra1", "symView2", "")
++            accents: customLayout.keyValue("row2extra1", "accents", "")
++            accentsShifted: customLayout.keyValue("row2extra1", "accentsShifted", "")
++        }
++
++        CharacterKey {
++            active: customLayout.keyActive("row2extra2", false)
++            caption: customLayout.keyValue("row2extra2", "caption", "")
++            captionShifted: customLayout.keyValue("row2extra2", "captionShifted", "")
++            symView: customLayout.keyValue("row2extra2", "symView", "")
++            symView2: customLayout.keyValue("row2extra2", "symView2", "")
++            accents: customLayout.keyValue("row2extra2", "accents", "")
++            accentsShifted: customLayout.keyValue("row2extra2", "accentsShifted", "")
++        }
++    }
++
++
++    /*
++     * Row 3
++     */
++
++    KeyboardRow {
++        splitIndex: customLayout.row3SplitIndex
++
++        ShiftKey {
++            implicitWidth: customLayout.row3ActiveCount > 7
++                           ? shiftKeyWidthNarrow
++                           : shiftKeyWidth
++        }
++
++        CharacterKey {
++            active: customLayout.keyActive("z", true)
++            caption: customLayout.keyValue("z", "caption", "z")
++            captionShifted: customLayout.keyValue("z", "captionShifted", "Z")
++            symView: customLayout.keyValue("z", "symView", "@")
++            symView2: customLayout.keyValue("z", "symView2", "«")
++            accents: customLayout.keyValue("z", "accents", "")
++            accentsShifted: customLayout.keyValue("z", "accentsShifted", "")
++        }
++
++        CharacterKey {
++            active: customLayout.keyActive("x", true)
++            caption: customLayout.keyValue("x", "caption", "x")
++            captionShifted: customLayout.keyValue("x", "captionShifted", "X")
++            symView: customLayout.keyValue("x", "symView", "&")
++            symView2: customLayout.keyValue("x", "symView2", "»")
++            accents: customLayout.keyValue("x", "accents", "")
++            accentsShifted: customLayout.keyValue("x", "accentsShifted", "")
++        }
++
++        CharacterKey {
++            active: customLayout.keyActive("c", true)
++            caption: customLayout.keyValue("c", "caption", "c")
++            captionShifted: customLayout.keyValue("c", "captionShifted", "C")
++            symView: customLayout.keyValue("c", "symView", "/")
++            symView2: customLayout.keyValue("c", "symView2", "\"")
++            accents: customLayout.keyValue("c", "accents", "cç")
++            accentsShifted: customLayout.keyValue("c", "accentsShifted", "CÇ")
++        }
++
++        CharacterKey {
++            active: customLayout.keyActive("v", true)
++            caption: customLayout.keyValue("v", "caption", "v")
++            captionShifted: customLayout.keyValue("v", "captionShifted", "V")
++            symView: customLayout.keyValue("v", "symView", "\\")
++            symView2: customLayout.keyValue("v", "symView2", "“")
++            accents: customLayout.keyValue("v", "accents", "")
++            accentsShifted: customLayout.keyValue("v", "accentsShifted", "")
++        }
++
++        CharacterKey {
++            active: customLayout.keyActive("b", true)
++            caption: customLayout.keyValue("b", "caption", "b")
++            captionShifted: customLayout.keyValue("b", "captionShifted", "B")
++            symView: customLayout.keyValue("b", "symView", "'")
++            symView2: customLayout.keyValue("b", "symView2", "”")
++            accents: customLayout.keyValue("b", "accents", "")
++            accentsShifted: customLayout.keyValue("b", "accentsShifted", "")
++        }
++
++        CharacterKey {
++            active: customLayout.keyActive("n", true)
++            caption: customLayout.keyValue("n", "caption", "n")
++            captionShifted: customLayout.keyValue("n", "captionShifted", "N")
++            symView: customLayout.keyValue("n", "symView", ";")
++            symView2: customLayout.keyValue("n", "symView2", "„")
++            accents: customLayout.keyValue("n", "accents", "nñ")
++            accentsShifted: customLayout.keyValue("n", "accentsShifted", "NÑ")
++        }
++
++        CharacterKey {
++            active: customLayout.keyActive("m", true)
++            caption: customLayout.keyValue("m", "caption", "m")
++            captionShifted: customLayout.keyValue("m", "captionShifted", "M")
++            symView: customLayout.keyValue("m", "symView", ":")
++            symView2: customLayout.keyValue("m", "symView2", "~")
++            accents: customLayout.keyValue("m", "accents", "")
++            accentsShifted: customLayout.keyValue("m", "accentsShifted", "")
++        }
++
++        CharacterKey {
++            active: customLayout.keyActive("row3extra1", false)
++            caption: customLayout.keyValue("row3extra1", "caption", "")
++            captionShifted: customLayout.keyValue("row3extra1", "captionShifted", "")
++            symView: customLayout.keyValue("row3extra1", "symView", "")
++            symView2: customLayout.keyValue("row3extra1", "symView2", "")
++            accents: customLayout.keyValue("row3extra1", "accents", "")
++            accentsShifted: customLayout.keyValue("row3extra1", "accentsShifted", "")
++        }
++
++        CharacterKey {
++            active: customLayout.keyActive("row3extra2", false)
++            caption: customLayout.keyValue("row3extra2", "caption", "")
++            captionShifted: customLayout.keyValue("row3extra2", "captionShifted", "")
++            symView: customLayout.keyValue("row3extra2", "symView", "")
++            symView2: customLayout.keyValue("row3extra2", "symView2", "")
++            accents: customLayout.keyValue("row3extra2", "accents", "")
++            accentsShifted: customLayout.keyValue("row3extra2", "accentsShifted", "")
++        }
++
++        BackspaceKey {
++            implicitWidth: customLayout.row3ActiveCount > 7
++                           ? shiftKeyWidthNarrow
++                           : shiftKeyWidth
++        }
++    }
++
++
++    /*
++     * Bottom row
++     */
++
++    KeyboardRow {
++        splitIndex: 4
++
++        SymbolKey {
++            symbolCaption: "ABC"
++            implicitWidth: symbolKeyWidthNarrow
++        }
++
++        CharacterKey {
++            active: customLayout.keyActive("punctExtra", false)
++
++            caption: customLayout.keyValue("punctExtra", "caption", "-")
++            captionShifted: customLayout.keyValue("punctExtra", "captionShifted", "-")
++            symView: customLayout.keyValue("punctExtra", "symView", "-")
++            symView2: customLayout.keyValue("punctExtra", "symView2", "-")
++            accents: customLayout.keyValue("punctExtra", "accents", "")
++            accentsShifted: customLayout.keyValue("punctExtra", "accentsShifted", "")
++
++            implicitWidth: punctuationKeyWidth
++            fixedWidth: !splitActive
++        }
++
++        ContextAwareCommaKey {
++            active: customLayout.keyActive("comma", true)
++
++            caption: customLayout.keyValue("comma", "caption", ",")
++            captionShifted: customLayout.keyValue("comma", "captionShifted", ",")
++            symView: customLayout.keyValue("comma", "symView", ",")
++            symView2: customLayout.keyValue("comma", "symView2", ",")
++            accents: customLayout.keyValue("comma", "accents", "")
++            accentsShifted: customLayout.keyValue("comma", "accentsShifted", "")
++
++            implicitWidth: punctuationKeyWidth
++        }
++
++        SpacebarKey {}
++
++        SpacebarKey {
++            languageLabel: ""
++            active: splitActive
++        }
++
++        PeriodKey {
++            active: customLayout.keyActive("period", true)
++
++            caption: customLayout.keyValue("period", "caption", ".")
++            captionShifted: customLayout.keyValue("period", "captionShifted", ".")
++            symView: customLayout.keyValue("period", "symView", ".")
++            symView2: customLayout.keyValue("period", "symView2", ".")
++            accents: customLayout.keyValue("period", "accents", "")
++            accentsShifted: customLayout.keyValue("period", "accentsShifted", "")
++
++            implicitWidth: punctuationKeyWidth
++        }
++
++        EnterKey {}
++    }
++}
+--- /dev/null   2026-08-11 06:46:35.606749245 +0200
++++ /usr/share/maliit/plugins/com/jolla/layouts/custom-keyboard.conf    2026-08-22 19:43:39.573305959 +0200
+@@ -0,0 +1,4 @@
++[custom-keyboard.qml]
++name=Custom-Keyboard
++languageCode=DE
++handler=Xt9InputHandler.qml 
